@@ -77,6 +77,26 @@ export default function App() {
         </AnimatePresence>
       </main>
 
+      {/* Watermark & Credits */}
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end opacity-40 pointer-events-none select-none text-right group hover:opacity-100 transition-opacity">
+        <div className="bg-white/20 backdrop-blur-md p-4 rounded-3xl border border-white/10 flex items-center gap-4 shadow-2xl">
+           <img 
+             src="/logo.png" 
+             alt="" 
+             className="w-16 h-16 md:w-20 md:h-20 object-contain" 
+             onError={(e) => (e.currentTarget.style.display = 'none')}
+           />
+           <div className="flex flex-col">
+             <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">
+               제작자
+             </span>
+             <span className="text-xs md:text-sm font-display font-bold text-slate-700 whitespace-nowrap">
+               Gabriel Math (Gabriel Byeongje Jeon)
+             </span>
+           </div>
+        </div>
+      </div>
+
       {/* Footer */}
       <footer className="bg-slate-900 py-16 px-6 border-t border-slate-800 text-center">
         <div className="max-w-4xl mx-auto space-y-6">

@@ -82,7 +82,19 @@ export const Activity1: React.FC = () => {
   const isWinner = Math.abs(finalX - activeMission.x) < 0.1 && Math.abs(finalY - activeMission.y) < 0.1;
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8 items-start">
+    <div className="grid lg:grid-cols-3 gap-8 items-start relative overflow-hidden">
+      {/* Background Watermark */}
+      <div 
+        className="absolute inset-x-0 top-40 h-[60%] pointer-events-none opacity-[0.03] flex items-center justify-center z-0"
+        style={{ 
+          backgroundImage: 'url("/logo.png")', 
+          backgroundSize: 'contain', 
+          backgroundPosition: 'center', 
+          backgroundRepeat: 'no-repeat',
+          filter: 'grayscale(1)' 
+        }}
+      />
+      
       <div className="lg:col-span-1 space-y-6">
         <div className="bg-blue-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
@@ -215,6 +227,23 @@ export const Activity1: React.FC = () => {
         <div className="absolute bottom-4 right-6 text-[10px] text-slate-400 font-mono uppercase tracking-widest pointer-events-none">
           Sector Grid: 1.0 Unit / Radial Gradient Enabled
         </div>
+      </div>
+
+      {/* Creator Credit */}
+      <div className="mt-8 pt-8 border-t border-slate-200 flex justify-between items-center px-4">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mb-1">Author & Designer</span>
+          <div className="flex items-center gap-3">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-10 h-10 object-contain" 
+              onError={(e) => (e.currentTarget.style.display = 'none')} 
+            />
+            <span className="text-sm font-display font-bold text-slate-600">제작자 : Gabriel Math (Gabriel Byeongje Jeon)</span>
+          </div>
+        </div>
+        <span className="text-[10px] text-slate-300 font-mono text-right">Discover Math Laboratory © 2026</span>
       </div>
     </div>
   );

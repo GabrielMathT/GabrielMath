@@ -89,7 +89,19 @@ export const Activity3: React.FC = () => {
   const tensionValue = Math.round(140 / (2 * Math.cos((angle * Math.PI) / 180)) * 1.4); // Scale for label "realism"
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 relative">
+      {/* Background Watermark */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center z-0"
+        style={{ 
+          backgroundImage: 'url("/logo.png")', 
+          backgroundSize: '40% auto', 
+          backgroundPosition: 'center', 
+          backgroundRepeat: 'no-repeat',
+          filter: 'grayscale(1)' 
+        }}
+      />
+      
       {/* Header & Intro */}
       <div className="space-y-4">
         <div className="inline-flex items-center gap-2 bg-red-100 px-3 py-1 rounded-full text-red-700 text-xs font-bold">
@@ -258,6 +270,23 @@ export const Activity3: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Creator Credit */}
+      <div className="mt-8 pt-8 border-t border-slate-200 flex justify-between items-center px-4">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mb-1">Author & Designer</span>
+          <div className="flex items-center gap-3">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-10 h-10 object-contain" 
+              onError={(e) => (e.currentTarget.style.display = 'none')} 
+            />
+            <span className="text-sm font-display font-bold text-slate-600">제작자 : Gabriel Math (Gabriel Byeongje Jeon)</span>
+          </div>
+        </div>
+        <span className="text-[10px] text-slate-300 font-mono text-right">Discover Math Laboratory © 2026</span>
       </div>
     </div>
   );
