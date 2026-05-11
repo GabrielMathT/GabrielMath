@@ -17,6 +17,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-700">
+      {/* Top Left Branding */}
+      <div className="absolute top-6 left-6 z-[100]">
+        <img 
+          src="/logo.png" 
+          alt="Logo" 
+          className="w-12 h-12 object-contain drop-shadow-sm"
+          onError={(e) => (e.currentTarget.style.display = 'none')}
+        />
+      </div>
+
       {/* Header */}
       <header className="pt-12 pb-8 px-6 text-center max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-slate-900 mb-4 leading-tight">
@@ -78,8 +88,8 @@ export default function App() {
       </main>
 
       {/* Watermark & Credits */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end opacity-40 pointer-events-none select-none text-right group hover:opacity-100 transition-opacity">
-        <div className="bg-white/20 backdrop-blur-md p-4 rounded-3xl border border-white/10 flex items-center gap-4 shadow-2xl">
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end opacity-80 pointer-events-none select-none text-right group hover:opacity-100 transition-opacity">
+        <div className="bg-white/40 backdrop-blur-md p-4 rounded-3xl border border-white/20 flex items-center gap-4 shadow-xl">
            <img 
              src="/logo.png" 
              alt="" 
@@ -90,7 +100,7 @@ export default function App() {
              <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">
                제작자
              </span>
-             <span className="text-xs md:text-sm font-display font-bold text-slate-700 whitespace-nowrap">
+             <span className="text-xs md:text-sm font-display font-bold text-slate-800 whitespace-nowrap">
                Gabriel Math (Gabriel Byeongje Jeon)
              </span>
            </div>

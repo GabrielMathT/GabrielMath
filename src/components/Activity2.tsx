@@ -150,13 +150,12 @@ export const Activity2: React.FC = () => {
     <div className="space-y-6 relative overflow-hidden">
       {/* Background Watermark */}
       <div 
-        className="absolute inset-x-0 top-60 h-[50%] pointer-events-none opacity-[0.03] flex items-center justify-center z-0"
+        className="absolute inset-x-0 top-60 h-[50%] pointer-events-none opacity-[0.05] flex items-center justify-center z-0"
         style={{ 
           backgroundImage: 'url("/logo.png")', 
           backgroundSize: 'contain', 
           backgroundPosition: 'center', 
-          backgroundRepeat: 'no-repeat',
-          filter: 'grayscale(1)' 
+          backgroundRepeat: 'no-repeat'
         }}
       />
       
@@ -365,7 +364,7 @@ export const Activity2: React.FC = () => {
               className="w-10 h-10 object-contain" 
               onError={(e) => (e.currentTarget.style.display = 'none')} 
             />
-            <span className="text-sm font-display font-bold text-slate-600">제작자 : Gabriel Math (Gabriel Byeongje Jeon)</span>
+            <span className="text-sm font-display font-bold text-slate-800">제작자 : Gabriel Math (Gabriel Byeongje Jeon)</span>
           </div>
         </div>
         <span className="text-[10px] text-slate-300 font-mono text-right">Discover Math Laboratory © 2026</span>
