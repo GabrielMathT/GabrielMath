@@ -91,19 +91,58 @@ export const Activity2: React.FC = () => {
     draw();
   }, [posA, posB, isChallengeMode, isTranslated, drawingStart, drawingEnd]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isTranslated) return; // 관점 이동 중에는 드래그 차단 (이해를 돕기 위함)
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = (e.clientX - rect.left) * (canvasRef.current!.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvasRef.current!.height / rect.height);
+  const getCanvasCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    let clientX, clientY;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
+    return { x, y };
+  };
+
+  const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
+    if (isTranslated) return;
+    const coords = getCanvasCoordinates(e);
+    if (!coords) return;
+    const { x, y } = coords;
 
     if (isChallengeMode) {
-      if (Math.hypot(x - posA.x, y - posA.y) < 25) setDrawingStart(posA);
-      else if (Math.hypot(x - posB.x, y - posB.y) < 25) setDrawingStart(posB);
-      setDrawingEnd(null);
-      setFeedback(null);
+      if (!drawingStart) {
+        // 첫 번째 클릭: 시작점 선택
+        if (Math.hypot(x - posA.x, y - posA.y) < 25) {
+          setDrawingStart(posA);
+          setDrawingEnd(posA);
+          setFeedback(null);
+        } else if (Math.hypot(x - posB.x, y - posB.y) < 25) {
+          setDrawingStart(posB);
+          setDrawingEnd(posB);
+          setFeedback(null);
+        }
+      } else {
+        // 두 번째 클릭: 종점 선택 및 검증
+        const distToA = Math.hypot(x - posA.x, y - posA.y);
+        const distToB = Math.hypot(x - posB.x, y - posB.y);
+
+        if (drawingStart === posA && distToB < 30) {
+          setFeedback({ msg: "정답! b - a는 A(관찰자)에서 B(대상)로 향하는 벡터입니다.", type: 'success' });
+        } else if (drawingStart === posB && distToA < 30) {
+          setFeedback({ msg: "이것은 a - b 입니다! 친구(B)가 나(A)를 바라보는 시점입니다.", type: 'info' });
+        } else {
+          setFeedback({ msg: "화살표를 점 A나 B에 정확히 연결해 보세요.", type: 'error' });
+        }
+        setDrawingStart(null);
+        setDrawingEnd(null);
+      }
     } else {
+      // 일반 모드: 드래그 이동
       if (Math.hypot(x - posA.x, y - posA.y) < 25) setDragging('A');
       else if (Math.hypot(x - posB.x, y - posB.y) < 25) setDragging('B');
     }
@@ -111,11 +150,10 @@ export const Activity2: React.FC = () => {
 
   const [isOverPoint, setIsOverPoint] = useState(false);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = (e.clientX - rect.left) * (canvasRef.current!.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvasRef.current!.height / rect.height);
+  const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
+    const coords = getCanvasCoordinates(e);
+    if (!coords) return;
+    const { x, y } = coords;
 
     const overA = Math.hypot(x - posA.x, y - posA.y) < 25;
     const overB = Math.hypot(x - posB.x, y - posB.y) < 25;
@@ -129,21 +167,8 @@ export const Activity2: React.FC = () => {
     }
   };
 
-  const handleMouseUp = () => {
-    if (isChallengeMode && drawingStart && drawingEnd) {
-      const distToA = Math.hypot(drawingEnd.x - posA.x, drawingEnd.y - posA.y);
-      const distToB = Math.hypot(drawingEnd.x - posB.x, drawingEnd.y - posB.y);
-
-      if (drawingStart === posA && distToB < 30) {
-        setFeedback({ msg: "정답! b - a는 A(관찰자)에서 B(대상)로 향하는 벡터입니다.", type: 'success' });
-      } else if (drawingStart === posB && distToA < 30) {
-        setFeedback({ msg: "이것은 a - b 입니다! 친구(B)가 나(A)를 바라보는 시점입니다.", type: 'info' });
-      } else {
-        setFeedback({ msg: "화살표를 점 A나 B에 정확히 연결해 보세요.", type: 'error' });
-      }
-    }
+  const handleEnd = () => {
     setDragging(null);
-    if (!drawingEnd) setDrawingStart(null);
   };
 
   return (
@@ -191,7 +216,7 @@ export const Activity2: React.FC = () => {
         ) : isChallengeMode ? (
           <p className="text-amber-800 leading-relaxed max-w-xl mx-auto font-medium">
             🚩 <b>나(A)</b>의 입장에서 <b>친구(B)</b>를 바라보는 화살표를 직접 그려보세요! <br/>
-            <span className="text-xs opacity-70">(점 A를 누른 채 점 B까지 드래그하세요)</span>
+            <span className="text-xs opacity-70">(점 A를 누르고, 이어서 점 B를 누르세요)</span>
           </p>
         ) : (
           <p className="text-amber-800/80 leading-relaxed max-w-xl mx-auto">
@@ -207,11 +232,17 @@ export const Activity2: React.FC = () => {
             ref={canvasRef}
             width={600}
             height={400}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={() => { handleMouseUp(); setDrawingStart(null); }}
-            style={{ cursor: isTranslated ? 'not-allowed' : (dragging || (isChallengeMode && drawingStart) ? 'grabbing' : isOverPoint ? 'pointer' : 'default') }}
+            onMouseDown={handleStart}
+            onMouseMove={handleMove}
+            onMouseUp={handleEnd}
+            onTouchStart={handleStart}
+            onTouchMove={handleMove}
+            onTouchEnd={handleEnd}
+            onMouseLeave={() => { handleEnd(); setDrawingStart(null); }}
+            style={{ 
+              cursor: isTranslated ? 'not-allowed' : (dragging || (isChallengeMode && drawingStart) ? 'grabbing' : isOverPoint ? 'pointer' : 'default'),
+              touchAction: 'none'
+            }}
             className="w-full h-auto bg-white border border-slate-200 rounded-3xl shadow-2xl transition-shadow group-hover:shadow-indigo-100 mb-4"
           />
           
@@ -231,7 +262,7 @@ export const Activity2: React.FC = () => {
           )}
 
           <div className="absolute top-4 left-6 flex items-center gap-2 bg-white/80 backdrop-blur px-3 py-1.5 rounded-full border border-slate-200 text-[10px] font-bold text-slate-500 shadow-sm pointer-events-none uppercase tracking-tight">
-            <MousePointer2 size={12} /> {isTranslated ? '관점 이동 중 (편집 불가)' : isChallengeMode ? 'A에서 B로 드래그하여 답을 그리세요' : '점 A, B를 드래그하여 위치 이동'}
+            <MousePointer2 size={12} /> {isTranslated ? '관점 이동 중 (편집 불가)' : isChallengeMode ? '시작점과 종점을 차례로 클릭하세요' : '점 A, B를 드래그하여 위치 이동'}
           </div>
         </div>
         
