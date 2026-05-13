@@ -14,6 +14,7 @@ export const Activity2: React.FC = () => {
   const [isTranslated, setIsTranslated] = useState(false); // New: 관점의 이동 모드
   const [drawingStart, setDrawingStart] = useState<Point | null>(null);
   const [drawingEnd, setDrawingEnd] = useState<Point | null>(null);
+  const [lastCompletedVector, setLastCompletedVector] = useState<{start: Point, end: Point} | null>(null);
   const [feedback, setFeedback] = useState<{ msg: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   const draw = () => {
@@ -54,9 +55,15 @@ export const Activity2: React.FC = () => {
     // Subtraction vector: b - a
     if (!isChallengeMode) {
       drawArrow(ctx, renderPosA.x, renderPosA.y, renderPosB.x, renderPosB.y, "#f59e0b", "b - a (나의 시선)");
-    } else if (drawingStart && drawingEnd) {
-      const renderStart = isTranslated && drawingStart === posA ? origin : drawingStart;
-      drawArrow(ctx, renderStart.x, renderStart.y, drawingEnd.x, drawingEnd.y, "#6366f1", "내가 그린 벡터");
+    } else {
+      // 그리기 모드에서 현재 그리는 중이거나 마지막으로 완성된 벡터 표시
+      if (drawingStart && drawingEnd) {
+        const renderStart = isTranslated && drawingStart === posA ? origin : drawingStart;
+        drawArrow(ctx, renderStart.x, renderStart.y, drawingEnd.x, drawingEnd.y, "#6366f1", "내가 그린 벡터");
+      } else if (lastCompletedVector) {
+        const renderStart = isTranslated && lastCompletedVector.start === posA ? origin : lastCompletedVector.start;
+        drawArrow(ctx, renderStart.x, renderStart.y, lastCompletedVector.end.x, lastCompletedVector.end.y, "#6366f1", "완성된 벡터");
+      }
     }
 
     // Draw Points
@@ -89,7 +96,7 @@ export const Activity2: React.FC = () => {
 
   useEffect(() => {
     draw();
-  }, [posA, posB, isChallengeMode, isTranslated, drawingStart, drawingEnd]);
+  }, [posA, posB, isChallengeMode, isTranslated, drawingStart, drawingEnd, lastCompletedVector]);
 
   const getCanvasCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -120,23 +127,33 @@ export const Activity2: React.FC = () => {
         if (Math.hypot(x - posA.x, y - posA.y) < 25) {
           setDrawingStart(posA);
           setDrawingEnd(posA);
+          setLastCompletedVector(null);
           setFeedback(null);
         } else if (Math.hypot(x - posB.x, y - posB.y) < 25) {
           setDrawingStart(posB);
           setDrawingEnd(posB);
+          setLastCompletedVector(null);
           setFeedback(null);
         }
       } else {
         // 두 번째 클릭: 종점 선택 및 검증
         const distToA = Math.hypot(x - posA.x, y - posA.y);
         const distToB = Math.hypot(x - posB.x, y - posB.y);
+        
+        let finalEnd: Point | null = null;
+        if (distToA < 30) finalEnd = posA;
+        else if (distToB < 30) finalEnd = posB;
+        else finalEnd = { x, y };
 
         if (drawingStart === posA && distToB < 30) {
           setFeedback({ msg: "정답! b - a는 A(관찰자)에서 B(대상)로 향하는 벡터입니다.", type: 'success' });
+          setLastCompletedVector({ start: drawingStart, end: posB });
         } else if (drawingStart === posB && distToA < 30) {
           setFeedback({ msg: "이것은 a - b 입니다! 친구(B)가 나(A)를 바라보는 시점입니다.", type: 'info' });
+          setLastCompletedVector({ start: drawingStart, end: posA });
         } else {
           setFeedback({ msg: "화살표를 점 A나 B에 정확히 연결해 보세요.", type: 'error' });
+          setLastCompletedVector({ start: drawingStart, end: finalEnd });
         }
         setDrawingStart(null);
         setDrawingEnd(null);
@@ -197,6 +214,7 @@ export const Activity2: React.FC = () => {
                setIsChallengeMode(!isChallengeMode);
                setDrawingStart(null);
                setDrawingEnd(null);
+               setLastCompletedVector(null);
                setFeedback(null);
              }}
              className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${isChallengeMode ? 'bg-amber-500 text-white' : 'bg-white text-amber-600 border border-amber-200'}`}
